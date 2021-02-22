@@ -25,7 +25,7 @@ def ema_nine_twenty_one(argv: list = sys.argv):
     # get last 22 minutes of trading data
     data = get_one_minute_data(minutes=22)
 
-    data['ema_9'] = data.close.ewm(span=21, min_periods=2).mean()
+    data['ema_9'] = data.close.ewm(span=9, min_periods=2).mean()
     data['ema_21'] = data.close.ewm(span=21, min_periods=2).mean()
     data['macd_9_21'] = data.ema_9 - data.ema_21
 
@@ -43,14 +43,14 @@ def ema_nine_twenty_one(argv: list = sys.argv):
     usd_balance = asset_balance * last_minute_of_data.close
 
     # if we have no holdings and the MACD turns positive, buy
-    if usd_balance < 0.05 and macd_9_21 > 0:
+    if usd_balance < 0.05 and last_minute_of_data.macd_9_21 > 0:
 
         logging.info('Placing a buy order')
         #place order with full USD capital balance
         buy_order(order_in_usd=get_most_recent_capital_balance())
     
     # if we are currently invested and the MACD turns negative, sell
-    elif usd_balance > 0.05 and macd_9_21 < 0:
+    elif usd_balance > 0.05 and last_minute_of_data.macd_9_21 < 0:
 
         logging.info('Placing a sell order')
         sell_order(sale_amount_in_usd=get_asset_balance(ASSET))

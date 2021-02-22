@@ -70,18 +70,18 @@ def buy_order(symbol: str = ASSET, order_in_usd: float = 10):
         logging.info(str(params))
         return
 
-    # Exchange may need multiple fills to complete order
-    # Add up the fills and calculate a mean price
-
-    price_fills = [float(fill['price']) for fill in json['fills']]
-    average_price_of_asset = np.mean(price_fills)
-
 
     #Append capitals collection to include the updated capital balance minus the commission taken on the trade
     capital_minus_commission = order_in_usd - order_in_usd*COMMISSION_PER_TRADE
     capital.insert_one({
         'capital': capital_minus_commission
     })
+
+    # Exchange may need multiple fills to complete order
+    # Add up the fills and calculate a mean price
+
+    price_fills = [float(fill['price']) for fill in json['fills']]
+    average_price_of_asset = np.mean(price_fills)
 
     #commit trade details to the trades collection
     #transact time should be able to be converted to timestamp
@@ -139,12 +139,18 @@ def sell_order(symbol: str = ASSET, sale_amount_in_usd: float = 10):
         'capital': capital_minus_commission
     })
 
+    # Exchange may need multiple fills to complete order
+    # Add up the fills and calculate a mean price
+
+    price_fills = [float(fill['price']) for fill in json['fills']]
+    average_price_of_asset = np.mean(price_fills)
+
     trade_details = {
         'asset': ASSET,
         'side': 'SELL',
         'transact_time': json['transactTime'],
         'price_paid': json['cummulativeQuoteQty'],
-        'average_price_of_asset': np.mean(price_fills)
+        'average_price_of_asset': average_price_of_asset
     }
 
     trades.insert_one(trade_details)

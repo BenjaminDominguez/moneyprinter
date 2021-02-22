@@ -1,6 +1,5 @@
 from dotenv import load_dotenv
 import os, sys
-import cryptocompare as crypto
 import logging
 import numpy as np
 
@@ -18,6 +17,7 @@ load_dotenv()
 ## General configuration variables
 ASSET = os.getenv('ASSET')
 STARTING_CAPITAL = float(os.getenv('STARTING_CAPITAL'))
+COMMISSION_PER_TRADE = float(os.getenv('COMMISSION_PER_TRADE'))
 
 BINANCE_API_KEY = os.getenv('BINANCE_API_KEY')
 BINANCE_SECRET_KEY = os.getenv('BINANCE_SECRET_KEY')
@@ -29,8 +29,6 @@ BINANCE_HEADERS = {
 BINANCE_ACCOUNT_URL = 'https://api.binance.us/api/v3/account'
 BINANCE_ORDER_URL = 'https://api.binance.us/api/v3/order'
 BINANCE_SERVER_TIME_URL = 'https://api.binance.com/api/v3/time'
-
-COMMISSION_PER_TRADE = os.getenv('COMMISSION_PER_TRADE')
 
 ## MongoDB configuration variables
 PYMONGO_USERNAME = os.getenv('PYMONGO_USERNAME')

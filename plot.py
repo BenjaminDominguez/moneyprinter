@@ -1,4 +1,4 @@
-from app.data.get_data import get_one_minute_data
+from app.get_data import get_one_minute_data
 from app.db import capital
 
 import numpy as np
@@ -18,12 +18,15 @@ def plot_capital_balances():
     ax.set_ylabel('USD')
     plt.show()
 
-def ohlc():
+def plot_ohlc(ema_higher=9, ema_lower=21):
     """
     plot OHLC with 45 and 105 ema
     """
-    data = get_one_minute_data()
+    data = get_one_minute_data(minutes=21)
+
     data['change_percent'] = data.close.pct_change()
+    data[f'ema_{ema_higher}'] = data.close.ewm(span=ema_higher).mean()
+    data[f'ema_{ema_lower}'] = data.close.ewm(span=ema_lower).mean()
 
     fig = plt.figure()
     fig.set_size_inches(10, 7)
@@ -77,9 +80,9 @@ def ohlc():
             ax.vlines(x=idx+0.5, lw=1, ymax=high_price, ymin=close_price, color=red, zorder=1000)
             ax.vlines(x=idx+0.5, lw=1, ymax=open_price, ymin=low_price, color=red, zorder=1000)
 
-    ax.plot(data.ema_45)
-    ax.plot(data.ema_105)
-    ax.legend(['ema_45', 'ema_105'])
+    ax.plot(data[f'ema_{ema_higher}'], zorder=1001)
+    ax.plot(data[f'ema_{ema_lower}'], zorder=1001)
+    ax.legend([f'ema_{ema_higher}', f'ema_{ema_lower}'])
     plt.show()
 
 if __name__ == '__main__':

@@ -2,9 +2,9 @@
 Grab minute data for a given coin from CryptoCompare API
 """
 
-from config import CRYPTO_COMPARE_API_KEY, ASSET
+from config import ASSET
 
-import cryptocompare as crypto
+import app.cryptocompare as crypto
 import pandas as pd
 import datetime
 
