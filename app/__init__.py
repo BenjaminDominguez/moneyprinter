@@ -1,7 +1,7 @@
 from typing import Callable
 import time
 
-def trade(strategy: Callable, strat_args: tuple = (), freq: int = 60):
+def trade(strategy: Callable, strat_kwargs: dict = {}, freq: int = 60):
     """
     Trade a given strategy at a given frequency.
 
@@ -12,7 +12,7 @@ def trade(strategy: Callable, strat_args: tuple = (), freq: int = 60):
     """
     while True:
         #call strategy at desired frequency
-        strategy(*strat_args)
+        strategy(**strat_kwargs)
         time.sleep(freq)
 
     return
