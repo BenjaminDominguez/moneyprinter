@@ -70,7 +70,6 @@ def _format_timestamp(timestamp: Timestamp) -> int:
     the integer representation accepted by the API.
 
     :param timestamp: timestamp to format
-
     """
     if isinstance(timestamp, datetime.datetime) or isinstance(timestamp, datetime.date):
         return int(time.mktime(timestamp.timetuple()))
@@ -186,8 +185,8 @@ def get_historical_price_hour(coin: str, currency: str = CURRENCY, limit: int = 
     return None
 
 
-def get_historical_price_minute(coin: str, currency: str = CURRENCY, limit: int = LIMIT,
-                                exchange: str = 'CCCAGG', toTs: Timestamp = time.time()) -> Optional[Dict]:
+def get_historical_price_minute(coin: str, toTs: Timestamp, currency: str = CURRENCY, limit: int = LIMIT,
+                                exchange: str = 'CCCAGG') -> Optional[Dict]:
     """
     Get historical price (minute).
 
