@@ -58,6 +58,6 @@ def ema_crossover(ema_shorter: int = 9, ema_longer: int = 21, argv: list = sys.a
         logging.info('USD balance: ' + str(usd_balance))
         logging.info('Placing a sell order')
         #sell 100% of holdings in coin
-        sell_order(sale_amount_in_usd=get_asset_balance(ASSET))
+        sell_order(sale_amount_in_coin_amount=get_asset_balance(ASSET))
     
     return

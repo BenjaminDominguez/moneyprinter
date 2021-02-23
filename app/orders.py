@@ -11,6 +11,7 @@ import pymongo
 import logging
 import numpy as np
 import time
+from datetime import datetime
 
 def get_asset_balance(symbol: str = ASSET) -> float:
 
@@ -70,29 +71,29 @@ def buy_order(symbol: str = ASSET, order_in_usd: float = 10):
         logging.info(str(params))
         return
 
+    purchase_amount_minus_commission = float(json['cummulativeQuoteQty'])*(1 - COMMISSION_PER_TRADE)
 
     #Append capitals collection to include the updated capital balance minus the commission taken on the trade
-    capital_minus_commission = order_in_usd - order_in_usd*COMMISSION_PER_TRADE
     capital.insert_one({
-        'capital': capital_minus_commission
+        'capital': purchase_amount_minus_commission,
+        'utc_time': datetime.utcnow()
     })
 
     # Exchange may need multiple fills to complete order
-    # Add up the fills and calculate a mean price
-
-    price_fills = [float(fill['price']) for fill in json['fills']]
-    average_price_of_asset = np.mean(price_fills)
-
-    #commit trade details to the trades collection
+    # Add up the fills and calculate a mean price and mean purchase amount minus commissions
+    fills = json['fills']
+    average_price_of_asset = np.mean([float(fill['price']) for fill in fills])
+    
     #transact time should be able to be converted to timestamp
     trade_details = {
         'asset': ASSET,
         'side': 'BUY',
-        'transact_time': json['transactTime'],
-        'price_paid': json['cummulativeQuoteQty'],
+        'utc_transaction_time': datetime.utcnow(),
+        'purchase_amount_minus_commission': purchase_amount_minus_commission,
         'average_price_of_asset': average_price_of_asset
     }
 
+    #commit trade details to the trades collection
     trades.insert_one(trade_details)
 
     logging.info('New trade alert (details below):')
@@ -102,13 +103,13 @@ def buy_order(symbol: str = ASSET, order_in_usd: float = 10):
     return
 
 
-def sell_order(symbol: str = ASSET, sale_amount_in_usd: float = 10):
+def sell_order(symbol: str = ASSET, sale_amount_in_coin_amount: float = 0.000001):
 
     """
     Creates a sell order for a given asset.
 
     :param symbol: the crypto symbol to trade (default: ASSET) Ex. 'ETH' or 'BTC'
-    :param sale_amount_in_usd: the amount in USD to sell (default: get_most_recent_capital_balance()) 
+    :param sale_amount_in_coin_amount: the amount in coin amount to sell (default: 0.000001) 
     :returns: None
 
     """
@@ -117,12 +118,11 @@ def sell_order(symbol: str = ASSET, sale_amount_in_usd: float = 10):
         'symbol': ASSET + 'USD',
         'side': 'SELL',
         'type': 'MARKET',
-        'quantity': sale_amount_in_usd,
+        'quantity': sale_amount_in_coin_amount,
         'timestamp': grab_server_time_int()
     }
 
     res = requests.post(BINANCE_ORDER_URL, params=create_signed_api_params(params), headers=BINANCE_HEADERS)
-
     json = res.json()
 
     #if we get any other status code but 200...
@@ -133,30 +133,29 @@ def sell_order(symbol: str = ASSET, sale_amount_in_usd: float = 10):
         logging.info(str(params))
         return
 
-    capital_minus_commission = json['cummulativeQuoteQty']
+    sale_amount_minus_commission = float(json['cummulativeQuoteQty'])*(1 - COMMISSION_PER_TRADE)
 
     capital.insert_one({
-        'capital': capital_minus_commission
+        'capital': sale_amount_minus_commission,
+        'utc_time': datetime.utcnow()
     })
 
     # Exchange may need multiple fills to complete order
     # Add up the fills and calculate a mean price
-
-    price_fills = [float(fill['price']) for fill in json['fills']]
-    average_price_of_asset = np.mean(price_fills)
+    fills = json['fills']
+    average_price_of_asset = np.mean([float(fill['price']) for fill in fills])
 
     trade_details = {
         'asset': ASSET,
         'side': 'SELL',
-        'transact_time': json['transactTime'],
-        'price_paid': json['cummulativeQuoteQty'],
+        'utc_transaction_time': datetime.utcnow(),
+        'sale_amount_minus_commission': sale_amount_minus_commission,
         'average_price_of_asset': average_price_of_asset
     }
 
     trades.insert_one(trade_details)
 
     logging.info('New trade alert (details below):')
-
     #log string version of dictionary
     logging.info(str(trade_details))
 
